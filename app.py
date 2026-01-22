@@ -16,7 +16,7 @@ aktuelle_jobs = []
 
 # --- DIE ECHTE API-FUNKTION ---
 
-def jobs_suchen(begriff, ort="Deutschland"):
+def jobs_suchen(begriff, ort="Deutschland", anzahl=10):
     """
     Ruft echte Jobs von der Agentur für Arbeit ab.
     Diese Funktion wird von der KI aufgerufen.
@@ -26,11 +26,15 @@ def jobs_suchen(begriff, ort="Deutschland"):
     # API Details der Bundesagentur für Arbeit
     url = "https://rest.arbeitsagentur.de/jobboerse/jobsuche-service/pc/v4/jobs"
     headers = {"X-API-Key": "jobboerse-jobsuche"}
+    
+    # Sicherstellen, dass anzahl eine Ganzzahl ist (KI schickt manchmal 20.0)
+    anzahl_int = int(float(anzahl)) if anzahl else 10
+    
     params = {
         "was": begriff, 
         "wo": ort, 
         "umkreis": 20, 
-        "size": 10
+        "size": anzahl_int
     }
 
     try:
