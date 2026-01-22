@@ -1,7 +1,7 @@
 DISCLAIMER
 
-I have no idea what i am doing and you might be able to stop me, idk.
+This repo is for a project for university and nothing here should be used to do anything. 
 
-note that 99% of the code in this repository is ai generated. i do not take any blame or pride in anything that is available here. its all vibe coded and i hate it too.
+the program it runs is accessible at **http://63.176.62.157:5001**
 
-the code is for a project for our university and the task was to vibe code something like the thing you see here. 
+developed and operated by team 16 wise @ TH Köln
