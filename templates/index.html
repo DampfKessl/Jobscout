@@ -1,41 +1,111 @@
 <!DOCTYPE html>
 <html lang="de">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Jobscout</title>
     <style>
         /* CSS: Das Aussehen der Seite */
-        body { font-family: sans-serif; background: #f4f4f4; margin: 0; padding: 20px; }
-        .container { max-width: 600px; margin: auto; background: white; padding: 20px; border-radius: 10px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
-        h1 { color: #C00009; text-align: center; }
-        
-        #chat-window { height: 300px; overflow-y: auto; border: 1px solid #ddd; padding: 10px; margin-bottom: 10px; background: #fafafa; }
-        .msg { margin-bottom: 10px; padding: 8px; border-radius: 5px; }
-        .user { background: #e3f2fd; text-align: right; }
-        .bot { background: #f1f8e9; }
+        body {
+            font-family: sans-serif;
+            background: #f4f4f4;
+            margin: 0;
+            padding: 20px;
+        }
 
-        .input-area { display: flex; gap: 10px; }
-        input { flex: 1; padding: 10px; border: 1px solid #ddd; border-radius: 5px; }
-        button { padding: 10px 20px; background: #C00009; color: white; border: none; border-radius: 5px; cursor: pointer; }
+        .container {
+            max-width: 600px;
+            margin: auto;
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        }
 
-        #job-list { margin-top: 20px; border-top: 2px solid #C00009; padding-top: 10px; }
-        .job-card { background: #fff; border: 1px solid #eee; padding: 10px; margin-bottom: 5px; border-radius: 5px; }
+        h1 {
+            color: #C00009;
+            text-align: center;
+        }
+
+        #chat-window {
+            height: 300px;
+            overflow-y: auto;
+            border: 1px solid #ddd;
+            padding: 10px;
+            margin-bottom: 10px;
+            background: #fafafa;
+        }
+
+        .msg {
+            margin-bottom: 10px;
+            padding: 8px;
+            border-radius: 5px;
+        }
+
+        .user {
+            background: #e3f2fd;
+            text-align: right;
+        }
+
+        .bot {
+            background: #f1f8e9;
+        }
+
+        .input-area {
+            display: flex;
+            gap: 10px;
+        }
+
+        input {
+            flex: 1;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+
+        button {
+            padding: 10px 20px;
+            background: #C00009;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        #job-list {
+            margin-top: 20px;
+            border-top: 2px solid #C00009;
+            padding-top: 10px;
+        }
+
+        .job-card {
+            background: #fff;
+            border: 1px solid #eee;
+            padding: 10px;
+            margin-bottom: 5px;
+            border-radius: 5px;
+        }
     </style>
 </head>
+
 <body>
 
     <div class="container">
         <h1>Jobscout</h1>
-        
+
         <!-- Bereich für den Chat -->
         <div id="chat-window">
-             <div class="msg bot">Hallo! Ich bin dein Job-Assistent. Was suchst du heute?</div>
+            <div class="msg bot">Hallo! Ich bin dein Job-Assistent. Was suchst du heute?</div>
         </div>
+
+        <div id="loading" style="display: none; font-size: 0.8em; color: gray; margin-bottom: 10px;">Jobscout denkt
+            nach...</div>
 
         <!-- Nachrichten eingeben -->
         <div class="input-area">
-            <input type="text" id="user-input" placeholder="Schreibe etwas...">
+            <input type="text" id="user-input" placeholder="Schreibe etwas..."
+                onkeypress="if(event.key === 'Enter') sendeNachricht()">
             <button onclick="sendeNachricht()">Senden</button>
         </div>
 
@@ -46,45 +116,63 @@
         </div>
     </div>
 
+    <!-- Ein kleines Programm (Library), das Texte schön formatiert (Markdown) -->
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <script>
         // JAVASCRIPT: Die Logik für die Website
 
         async function sendeNachricht() {
             const inputField = document.getElementById('user-input');
+            const loading = document.getElementById('loading');
             const nachricht = inputField.value;
             if (!nachricht) return;
 
             // Nachricht im Chat anzeigen
             fugeNachrichtHinzu('user', nachricht);
             inputField.value = '';
+            loading.style.display = 'block';
 
-            // Anfrage an unseren Python-Server (app.py) schicken
-            const antwortRaw = await fetch('/ask', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ message: nachricht })
-            });
-            const daten = await antwortRaw.json();
+            try {
+                // Anfrage an unseren Python-Server (app.py) schicken
+                const antwortRaw = await fetch('/ask', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ message: nachricht })
+                });
+                const daten = await antwortRaw.json();
 
-            // Antwort der KI anzeigen
-            fugeNachrichtHinzu('bot', daten.response);
+                // Antwort der KI anzeigen
+                fugeNachrichtHinzu('bot', daten.response);
 
-            // Job-Liste aktualisieren
-            aktualisiereJobs(daten.jobs);
+                // Job-Liste aktualisieren
+                aktualisiereJobs(daten.jobs);
+            } catch (e) {
+                fugeNachrichtHinzu('bot', 'Fehler: Server nicht erreichbar.');
+            } finally {
+                loading.style.display = 'none';
+            }
         }
 
         function fugeNachrichtHinzu(wer, text) {
             const window = document.getElementById('chat-window');
             const div = document.createElement('div');
             div.className = 'msg ' + wer;
-            div.innerText = text;
+
+            // marked.parse wandelt Markdown (z.B. **fett**) in HTML um
+            if (wer === 'bot') {
+                div.innerHTML = marked.parse(text);
+            } else {
+                div.innerText = text;
+            }
+
             window.appendChild(div);
             window.scrollTop = window.scrollHeight; // Nach unten scrollen
         }
 
         function aktualisiereJobs(jobs) {
             const container = document.getElementById('jobs-container');
-            if (jobs.length === 0) {
+
+            if (!jobs || jobs.length === 0) {
                 container.innerText = "Noch keine Jobs gefunden.";
                 return;
             }
@@ -99,4 +187,5 @@
         }
     </script>
 </body>
+
 </html>
