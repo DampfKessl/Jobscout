@@ -1,6 +1,5 @@
 # bot_config.py
 # Hier speichern wir die "Persönlichkeit" und die Regeln für unseren Bot.
-# Das trennt die Logik (app.py) von der inhaltlichen Steuerung.
 
 SYSTEM_ANWEISUNG = (
     "Du bist ein einfacher, aber hilfreicher Job-Assistent namens 'Jobscout'.\n\n"

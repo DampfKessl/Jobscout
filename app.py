@@ -5,19 +5,16 @@ import requests
 from dotenv import load_dotenv
 from bot_config import SYSTEM_ANWEISUNG
 
-# 1. SETUP: API-Keys und Konfiguration laden
+# API-Keys und Konfiguration
 load_dotenv()
 genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
 
-# Diese Konstante hält den API-Key für die Jobsuche (Topologische Verbesserung)
 JOB_API_KEY = "jobboerse-jobsuche"
 
 app = Flask(__name__)
 
-# Ein einfacher globaler Speicher für die Jobs (reicht für einen Prototyp völlig aus)
+# Ein einfacher globaler Speicher für die Jobs
 aktuelle_jobs = []
-
-# --- DIE ECHTE API-FUNKTION ---
 
 def jobs_suchen(begriff, ort="Deutschland", anzahl=10):
     """
@@ -44,7 +41,7 @@ def jobs_suchen(begriff, ort="Deutschland", anzahl=10):
         response.raise_for_status() # Stoppt hier, falls die API einen Fehler meldet
         daten = response.json()
 
-        # Ergebnisse verarbeiten und in unser Format umwandeln
+        # Ergebnisse verarbeiten
         neue_gefundene_jobs = []
         for job in daten.get('stellenangebote', []):
             ref_nr = job.get('refnr')
@@ -73,7 +70,7 @@ def liste_leeren():
     aktuelle_jobs = []
     return "Liste wurde geleert."
 
-# --- KI INITIALISIERUNG ---
+# KI-Initialisierung
 
 model = genai.GenerativeModel(
     model_name="gemini-2.0-flash-exp",
@@ -81,10 +78,10 @@ model = genai.GenerativeModel(
     tools=[jobs_suchen, liste_leeren]
 )
 
-# Wir starten eine kontinuierliche Chat-Sitzung
+# Chat-Sitzung
 chat_session = model.start_chat(enable_automatic_function_calling=True)
 
-# --- ROUTES ---
+# Routen
 
 @app.route('/')
 def index():
@@ -106,5 +103,5 @@ def ask():
     })
 
 if __name__ == '__main__':
-    print("Jobscout Lite läuft! Öffne http://127.0.0.1:5000 in deinem Browser.")
+    print("Jobscout ist online!")
     app.run(debug=True)
