@@ -73,7 +73,7 @@ def liste_leeren():
 # KI-Initialisierung
 
 model = genai.GenerativeModel(
-    model_name="gemini-2.0-flash-exp",
+    model_name="gemini-2.0-flash",
     system_instruction=SYSTEM_ANWEISUNG,
     tools=[jobs_suchen, liste_leeren]
 )
